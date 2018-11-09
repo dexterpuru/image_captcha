@@ -1,0 +1,69 @@
+<html>
+<head>
+<title>Group.py</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.s0 { color: #000080; font-weight: bold;}
+.s1 { color: #000000;}
+.s2 { color: #0000ff;}
+.s3 { color: #808080; font-style: italic;}
+.s4 { color: #008080; font-weight: bold;}
+</style>
+</head>
+<body bgcolor="#ffffff">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#c0c0c0" >
+<tr><td><center>
+<font face="Arial, Helvetica" color="#000000">
+Group.py</font>
+</center></td></tr></table>
+<pre><span class="s0">import </span>sqlite3
+<span class="s0">import </span>Image
+<span class="s0">class </span>Group:
+    id = <span class="s0">None</span>
+    statement = <span class="s0">None</span>
+    images = [<span class="s2">0</span>,<span class="s2">0</span>,<span class="s2">0</span>,<span class="s2">0</span>,<span class="s2">0</span>,<span class="s2">0</span>,<span class="s2">0</span>,<span class="s2">0</span>,<span class="s2">0</span>]
+    answer = [<span class="s2">0</span>,<span class="s2">0</span>,<span class="s2">0</span>,<span class="s2">0</span>,<span class="s2">0</span>,<span class="s2">0</span>,<span class="s2">0</span>,<span class="s2">0</span>,<span class="s2">0</span>] <span class="s3"># RIGHT ANS TAKES FROM THE DATABASE</span>
+    response = [<span class="s2">0</span>,<span class="s2">0</span>,<span class="s2">0</span>,<span class="s2">0</span>,<span class="s2">0</span>,<span class="s2">0</span>,<span class="s2">0</span>,<span class="s2">0</span>,<span class="s2">0</span>] <span class="s3"># BASED ON USER RESPONSE IT WILL CREATE A LIST</span>
+
+    <span class="s0">def </span>__init__(self,id):
+        self.id=id <span class="s3"># setting the group id</span>
+        connection = sqlite3.connect(<span class="s4">&quot;database.db&quot;</span>)
+        cursor = connection.execute(<span class="s4">&quot;SELECT id FROM IMAGES WHERE GROUP_ID=:ID&quot;</span>, {<span class="s4">&quot;ID&quot;</span>: self.id}).fetchall()
+        i=<span class="s2">0</span>
+        <span class="s3"># NOW CALL THE IMAGE CLASS AND SET ATTRIBUTES FOR EVERY IMAGE</span>
+        <span class="s0">for </span>c <span class="s0">in </span>cursor:
+            self.images[i] = Image.Image(c[<span class="s2">0</span>])
+            <span class="s3"># NOW SET THE RIGHT ANSWER FROM THE DATABASE</span>
+            self.set_answer_for(i,self.images[i].is_right)
+            print(self.images[i].get_image_path())
+            i += <span class="s2">1</span>
+        print(self.answer)
+        <span class="s3">#Now set the statement</span>
+        self.set_statement()
+
+    <span class="s0">def </span>set_answer_for(self,index,value):
+        self.answer[index] = value
+
+    <span class="s0">def </span>get_answer_list(self):
+        <span class="s0">return </span>self.answer
+
+    <span class="s0">def </span>set_response_for(self,index):
+        <span class="s3"># just we have to apply toggle here</span>
+        <span class="s0">if </span>self.response[index]==<span class="s2">1</span>:
+            self.response[index]=<span class="s2">0</span>
+        <span class="s0">else</span>:
+            self.response[index]=<span class="s2">1</span>
+
+    <span class="s0">def </span>get_answer_list(self):
+        <span class="s0">return </span>self.response
+
+    <span class="s0">def </span>set_statement(self):
+        connection = sqlite3.connect(<span class="s4">&quot;database.db&quot;</span>)
+        cursor = connection.execute(<span class="s4">&quot;SELECT * FROM GROUPS WHERE ID=:ID&quot;</span>,{<span class="s4">&quot;ID&quot;</span>:self.id}).fetchall()
+        self.statement = cursor[<span class="s2">0</span>][<span class="s2">1</span>]
+        print(self.statement)
+        
+    <span class="s0">def </span>get_image_list(self):
+        <span class="s0">return </span>self.images</pre>
+</body>
+</html>

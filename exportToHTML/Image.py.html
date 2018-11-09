@@ -1,0 +1,40 @@
+<html>
+<head>
+<title>Image.py</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.s0 { color: #000080; font-weight: bold;}
+.s1 { color: #000000;}
+.s2 { color: #008080; font-weight: bold;}
+.s3 { color: #0000ff;}
+</style>
+</head>
+<body bgcolor="#ffffff">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#c0c0c0" >
+<tr><td><center>
+<font face="Arial, Helvetica" color="#000000">
+Image.py</font>
+</center></td></tr></table>
+<pre><span class="s0">import </span>sqlite3
+<span class="s0">class </span>Image:
+    id=<span class="s0">None</span>
+    path=<span class="s0">None</span>
+    is_right=<span class="s0">None</span>
+    def __init__(self,id):
+        self.id = id
+        connection = sqlite3.connect(<span class="s2">&quot;database.db&quot;</span>)
+        cursor = connection.execute(<span class="s2">&quot;SELECT * FROM IMAGES WHERE ID=:ID&quot;</span>,{<span class="s2">&quot;ID&quot;</span>:self.id}).fetchall()
+        self.path = cursor[<span class="s3">0</span>][<span class="s3">1</span>]
+        self.is_right = cursor[<span class="s3">0</span>][<span class="s3">3</span>]
+
+    <span class="s0">def </span>get_image_path(self):
+        <span class="s0">return </span>self.path
+
+    <span class="s0">def </span>get_is_right(self):
+        <span class="s0">return </span>self.is_right
+
+
+
+</pre>
+</body>
+</html>

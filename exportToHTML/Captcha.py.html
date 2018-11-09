@@ -1,0 +1,129 @@
+<html>
+<head>
+<title>Captcha.py</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.s0 { color: #000080; font-weight: bold;}
+.s1 { color: #000000;}
+.s2 { color: #0000ff;}
+.s3 { color: #008080; font-weight: bold;}
+.s4 { color: #808080; font-style: italic;}
+</style>
+</head>
+<body bgcolor="#ffffff">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#c0c0c0" >
+<tr><td><center>
+<font face="Arial, Helvetica" color="#000000">
+Captcha.py</font>
+</center></td></tr></table>
+<pre><span class="s0">import </span>Group
+<span class="s0">import </span>Image
+<span class="s0">import </span>sqlite3
+<span class="s0">from </span>tkinter <span class="s0">import </span>*
+<span class="s0">from </span>PIL <span class="s0">import </span>Image, ImageTk
+<span class="s0">class </span>Captcha(Group.Group):
+    num_groups = <span class="s0">None</span>
+    num_failed_submissions = <span class="s0">None</span>
+    panel = [<span class="s2">0</span>,<span class="s2">0</span>,<span class="s2">0</span>,<span class="s2">0</span>,<span class="s2">0</span>,<span class="s2">0</span>,<span class="s2">0</span>,<span class="s2">0</span>,<span class="s2">0</span>]
+    img = [<span class="s2">0</span>,<span class="s2">0</span>,<span class="s2">0</span>,<span class="s2">0</span>,<span class="s2">0</span>,<span class="s2">0</span>,<span class="s2">0</span>,<span class="s2">0</span>,<span class="s2">0</span>]
+    root = <span class="s0">None</span>
+    frame = <span class="s0">None</span>
+    result_panel=<span class="s0">None</span>
+    chances=<span class="s2">5</span>
+
+    <span class="s0">def </span>__init__(self,root,group_id):
+        super().__init__(group_id)
+        self.root=root
+        self.group_id = group_id
+        self.show_welcome_page()
+        
+   
+    
+    <span class="s0">def </span>show_welcome_page(self):
+        self.frame = Frame(self.root, height=<span class="s2">600</span>, width=<span class="s2">1000</span>)
+        heading = Label(self.frame,text=<span class="s3">&quot; WELCOME TO IMAGE BASED CAPTCHA &quot;</span>,fg=<span class="s3">&quot;GREEN&quot;</span>,font=(<span class="s3">'helvetica'</span>, <span class="s2">20</span>, <span class="s3">'underline italic'</span>))
+        heading.grid(row=<span class="s2">1</span>,column=<span class="s2">1</span>)
+        button = Button(self.frame,text=<span class="s3">&quot;I am not a ROBOT&quot;</span>,pady=<span class="s2">10</span>,bg=<span class="s3">'#07c'</span>, command=self.show_captcha)
+        button.grid(row=<span class="s2">2</span>,column=<span class="s2">1</span>,sticky=N+S+E+W)
+        self.frame.pack()
+        
+    
+        
+    <span class="s0">def </span>show_captcha(self):
+        self.frame.destroy()
+        self.frame = Frame(self.root, padx=<span class="s2">10</span>,pady=<span class="s2">10</span>)
+        heading = Label(self.frame, text=<span class="s3">&quot;Please verify yourself&quot;</span>,fg=<span class="s3">&quot;red&quot;</span>,font=(<span class="s3">'helvetica'</span>, <span class="s2">15</span>, <span class="s3">'underline italic'</span>)).grid(row=<span class="s2">0</span>,column=<span class="s2">0</span>,columnspan=<span class="s2">5</span>)
+        statement = Label(self.frame, text=self.statement,fg=<span class="s3">&quot;purple&quot;</span>,font=(<span class="s3">'helvetica'</span>, <span class="s2">20</span>,<span class="s3">'bold'</span>)).grid(row=<span class="s2">1</span>,column=<span class="s2">0</span>,columnspan=<span class="s2">5</span>)
+        iteration_valiable = <span class="s2">0</span>
+        <span class="s0">for </span>i <span class="s0">in </span>range(<span class="s2">2</span>,<span class="s2">5</span>):
+            <span class="s0">for </span>j <span class="s0">in </span>range(<span class="s2">2</span>,<span class="s2">5</span>):
+                self.img[iteration_valiable] = Image.open(self.images[iteration_valiable].get_image_path())
+                self.img[iteration_valiable] = self.img[iteration_valiable] .resize((<span class="s2">150</span>, <span class="s2">150</span>), Image.ANTIALIAS)
+                self.img[iteration_valiable] = ImageTk.PhotoImage(self.img[iteration_valiable] )
+                self.panel[iteration_valiable] = Button(self.frame,image=self.img[iteration_valiable],padx=<span class="s2">30</span>,pady=<span class="s2">30</span>,bg=<span class="s3">&quot;red&quot;</span>, command=<span class="s0">lambda </span>i=i,j=i,index=iteration_valiable: self.image_clicked(index,i,j))
+                self.panel[iteration_valiable].grid(row=i,column=j)
+                print(i,<span class="s3">&quot; &quot;</span>,j)
+                iteration_valiable += <span class="s2">1</span>
+        
+        submit_button = Button(self.frame,text=<span class="s3">&quot;VERIFY&quot;</span>, command=self.verify).grid(row=<span class="s2">6</span>,sticky=N+S+E+W,column=<span class="s2">2</span>)
+        reset = Button(self.frame,text=<span class="s3">&quot;RESET&quot;</span>, command=self.reset).grid(row=<span class="s2">6</span>,sticky=N+S+E+W,column=<span class="s2">3</span>,columnspan=<span class="s2">1</span>)
+        next = Button(self.frame,text=<span class="s3">&quot;NEW CAPTCHA&quot;</span>, command=self.next_captcha).grid(row=<span class="s2">6</span>,sticky=N+S+E+W,column=<span class="s2">4</span>)
+        self.frame.pack()
+        
+    <span class="s0">def </span>image_clicked(self,index,i,j):
+        print(<span class="s3">&quot;the index is &quot;</span>,index)
+        <span class="s4"># Now we have to save the response</span>
+        self.set_response_for(index)
+        print(self.answer)
+        print(self.response)
+        print(self.panel[index])
+        self.panel[index].config(bg=<span class="s3">'green'</span>)
+        self.panel[index].grid()
+        
+    <span class="s0">def </span>verify(self):
+        self.chances -= <span class="s2">1</span>
+        <span class="s4"># we are going to compare the answer and response</span>
+        count=<span class="s2">0</span>
+        <span class="s0">for </span>i <span class="s0">in </span>self.answer:
+            <span class="s0">if</span>(self.answer[i]==self.response[i]):
+                count += <span class="s2">1</span>
+            <span class="s0">else</span>:
+                count=-<span class="s2">19</span>
+        <span class="s0">if</span>(self.result_panel):
+            self.result_panel.destroy()
+        <span class="s0">if</span>(count==<span class="s2">9 </span><span class="s0">and </span>self.chances&gt;<span class="s2">0</span>):
+            print(<span class="s3">&quot;VERIFIED&quot;</span>)
+            self.result_panel = Label(self.root,text=<span class="s3">&quot;ACCESS GRANTED!&quot; </span>,fg=<span class="s3">&quot;GREEN&quot;</span>,font=(<span class="s3">'helvetica'</span>, <span class="s2">40</span>, <span class="s3">'underline italic'</span>))
+            self.result_panel.pack()
+        <span class="s0">elif</span>(self.chances&gt;<span class="s2">0</span>):
+            print(<span class="s3">&quot;REJECTED&quot;</span>)
+            self.result_panel = Label(self.root, text=<span class="s3">&quot;WRONG... &quot;</span>+str(self.chances)+<span class="s3">&quot; left&quot;</span>, fg=<span class="s3">&quot;ORANGE&quot;</span>,
+                                      font=(<span class="s3">'helvetica'</span>, <span class="s2">40</span>, <span class="s3">'underline italic'</span>))
+            self.result_panel.pack()
+        <span class="s0">else</span>:
+            print(<span class="s3">&quot;DENIED&quot;</span>)
+            self.result_panel = Label(self.root, text=<span class="s3">&quot;ACCESS DENIED, TRY AGAIN&quot;</span>, fg=<span class="s3">&quot;RED&quot;</span>, font=(<span class="s3">'helvetica'</span>, <span class="s2">40</span>, <span class="s3">'underline italic'</span>))
+            self.result_panel.pack()
+            
+    <span class="s0">def </span>reset(self):
+        <span class="s0">if</span>(self.result_panel):
+            self.result_panel.destroy()
+        self.frame.destroy()
+        self.show_captcha()
+        
+    <span class="s0">def </span>next_captcha(self):
+        <span class="s0">if </span>(self.result_panel):
+            self.result_panel.destroy()
+        self.frame.destroy()
+        <span class="s4"># SELECT THE DIFF ID OF GROUP FROM THE DATABASE</span>
+        conn = sqlite3.connect(<span class="s3">&quot;database.db&quot;</span>)
+        c = conn.execute(<span class="s3">&quot;SELECT ID FROM GROUPS ORDER BY RANDOM() LIMIT 1&quot;</span>)
+        <span class="s0">for </span>i <span class="s0">in </span>c:
+            self.group_id = i[<span class="s2">0</span>]
+        <span class="s4"># now initialize the captcha again</span>
+        super().__init__(self.group_id)
+        self.show_captcha()
+        
+        </pre>
+</body>
+</html>
